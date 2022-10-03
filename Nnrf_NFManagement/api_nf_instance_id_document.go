@@ -11,14 +11,19 @@ package Nnrf_NFManagement
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/free5gc/openapi"
 	"github.com/free5gc/openapi/models"
+	"golang.org/x/net/http2"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 // Linger please
@@ -62,6 +67,29 @@ func (a *NFInstanceIDDocumentApiService) DeregisterNFInstance(ctx context.Contex
 	localVarHTTPHeaderAccept := openapi.SelectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	scopes := []string{"nnrf-nfm"}
+	additional_params, ok := ctx.Value(openapi.ContextOAuthAdditionalParams).(url.Values)
+	if !ok {
+		return nil, fmt.Errorf("OAuth parameters are invalid")
+	}
+	oauth, err := strconv.ParseBool(additional_params["OAuth"][0])
+	if err != nil {
+		return nil, fmt.Errorf(err.Error())
+	}
+	if oauth {
+		tokenUrl := fmt.Sprintf("%v/oauth2/token", additional_params["NrfUri"][0])
+		additional_params.Del("NrfUri")
+		additional_params.Del("OAuth")
+		additional_params.Add("targetNfType", "NRF")
+		conf := &clientcredentials.Config{Scopes: scopes, TokenURL: tokenUrl, AuthStyle: oauth2.AuthStyleInParams, EndpointParams: additional_params}
+		http_client := &http.Client{Transport: &http2.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+		ctx = context.WithValue(ctx, oauth2.HTTPClient, http_client)
+		token, err := conf.Token(ctx)
+		if err != nil {
+			return nil, fmt.Errorf(err.Error())
+		}
+		ctx = context.WithValue(ctx, openapi.ContextAccessToken, token.AccessToken)
 	}
 
 	r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
@@ -133,6 +161,29 @@ func (a *NFInstanceIDDocumentApiService) GetNFInstance(ctx context.Context, nfIn
 	localVarHTTPHeaderAccept := openapi.SelectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	scopes := []string{"nnrf-nfm"}
+	additional_params, ok := ctx.Value(openapi.ContextOAuthAdditionalParams).(url.Values)
+	if !ok {
+		return localVarReturnValue, nil, fmt.Errorf("OAuth parameters are invalid")
+	}
+	oauth, err := strconv.ParseBool(additional_params["OAuth"][0])
+	if err != nil {
+		return localVarReturnValue, nil, fmt.Errorf(err.Error())
+	}
+	if oauth {
+		tokenUrl := fmt.Sprintf("%v/oauth2/token", additional_params["NrfUri"][0])
+		additional_params.Del("NrfUri")
+		additional_params.Del("OAuth")
+		additional_params.Add("targetNfType", "NRF")
+		conf := &clientcredentials.Config{Scopes: scopes, TokenURL: tokenUrl, AuthStyle: oauth2.AuthStyleInParams, EndpointParams: additional_params}
+		http_client := &http.Client{Transport: &http2.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+		ctx = context.WithValue(ctx, oauth2.HTTPClient, http_client)
+		token, err := conf.Token(ctx)
+		if err != nil {
+			return localVarReturnValue, nil, fmt.Errorf(err.Error())
+		}
+		ctx = context.WithValue(ctx, openapi.ContextAccessToken, token.AccessToken)
 	}
 
 	r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
@@ -293,6 +344,29 @@ func (a *NFInstanceIDDocumentApiService) RegisterNFInstance(ctx context.Context,
 
 	// body params
 	localVarPostBody = &nfProfile
+	// scopes := []string{"nnrf-nfm",}
+	// additional_params, ok := ctx.Value(openapi.ContextOAuthAdditionalParams).(url.Values)
+	// if !ok {
+	// 	return localVarReturnValue, nil, fmt.Errorf("OAuth parameters are invalid")
+	// }
+	// oauth, err := strconv.ParseBool(additional_params["OAuth"][0])
+	// if err != nil {
+	// 	return localVarReturnValue, nil, fmt.Errorf(err.Error())
+	// }
+	// if oauth {
+	// 	tokenUrl := fmt.Sprintf("%v/oauth2/token", additional_params["NrfUri"][0])
+	// 	additional_params.Del("NrfUri")
+	// 	additional_params.Del("OAuth")
+	// 	additional_params.Add("targetNfType", "NRF")
+	// 	conf := &clientcredentials.Config{Scopes: scopes, TokenURL: tokenUrl, AuthStyle: oauth2.AuthStyleInParams, EndpointParams: additional_params}
+	// 	http_client := &http.Client{Transport: &http2.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+	// 	ctx = context.WithValue(ctx, oauth2.HTTPClient, http_client)
+	// 	token, err := conf.Token(ctx)
+	// 	if err != nil {
+	// 		return localVarReturnValue, nil, fmt.Errorf(err.Error())
+	// 	}
+	// 	ctx = context.WithValue(ctx, openapi.ContextAccessToken, token.AccessToken)
+	// }
 
 	r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -455,6 +529,29 @@ func (a *NFInstanceIDDocumentApiService) UpdateNFInstance(ctx context.Context, n
 
 	// body params
 	localVarPostBody = &patchItem
+	scopes := []string{"nnrf-nfm"}
+	additional_params, ok := ctx.Value(openapi.ContextOAuthAdditionalParams).(url.Values)
+	if !ok {
+		return localVarReturnValue, nil, fmt.Errorf("OAuth parameters are invalid")
+	}
+	oauth, err := strconv.ParseBool(additional_params["OAuth"][0])
+	if err != nil {
+		return localVarReturnValue, nil, fmt.Errorf(err.Error())
+	}
+	if oauth {
+		tokenUrl := fmt.Sprintf("%v/oauth2/token", additional_params["NrfUri"][0])
+		additional_params.Del("NrfUri")
+		additional_params.Del("OAuth")
+		additional_params.Add("targetNfType", "NRF")
+		conf := &clientcredentials.Config{Scopes: scopes, TokenURL: tokenUrl, AuthStyle: oauth2.AuthStyleInParams, EndpointParams: additional_params}
+		http_client := &http.Client{Transport: &http2.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}}
+		ctx = context.WithValue(ctx, oauth2.HTTPClient, http_client)
+		token, err := conf.Token(ctx)
+		if err != nil {
+			return localVarReturnValue, nil, fmt.Errorf(err.Error())
+		}
+		ctx = context.WithValue(ctx, openapi.ContextAccessToken, token.AccessToken)
+	}
 
 	r, err := openapi.PrepareRequest(ctx, a.client.cfg, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
