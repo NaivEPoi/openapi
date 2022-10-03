@@ -30,7 +30,7 @@ func CheckOAuth(authorization string, scopes []string) (bool, error) {
 }
 
 func parseNRFCert() (*rsa.PublicKey, error) {
-	f, err := os.ReadFile("./config/cert/nrf.pem")
+	f, err := os.ReadFile("../config/cert/nrf.pem") // Changed for testing
 	if err != nil {
 		return nil, err
 	}
